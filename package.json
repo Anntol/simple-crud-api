@@ -1,0 +1,20 @@
+{
+  "name": "simple-crud-api",
+  "version": "1.0.0",
+  "description": "simple CRUD API using in-memory database underneath",
+  "main": "server.js",
+  "scripts": {
+    "start": "node src/server.js" 
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anntol/simple-crud-api.git"
+  },
+  "author": "Anna Tolstova",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Anntol/simple-crud-api/issues"
+  },
+  "homepage": "https://github.com/Anntol/simple-crud-api#readme"
+}
