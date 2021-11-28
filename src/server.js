@@ -1,12 +1,12 @@
 import http from 'http';
+import route from './persons/person.router.js';
 
 const HOST = process.env.HOST || 'localhost';
 const PORT = process.env.PORT || 5500;
 
 const server = http.createServer((req, res) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/html');
-    res.write('<h1>Server works!</h1>');
-    res.end();
+    route(req, res);
 });
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, HOST,
+    () => console.log(`Server running on ${HOST}:${PORT}`)
+);

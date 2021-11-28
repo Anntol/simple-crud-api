@@ -4,7 +4,7 @@
   "description": "simple CRUD API using in-memory database underneath",
   "main": "server.js",
   "scripts": {
-    "start": "node src/server.js" 
+    "start": "node src/server.js"
   },
   "type": "module",
   "repository": {
@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Anntol/simple-crud-api/issues"
   },
-  "homepage": "https://github.com/Anntol/simple-crud-api#readme"
+  "homepage": "https://github.com/Anntol/simple-crud-api#readme",
+  "dependencies": {
+    "uuid": "8.3.2"
+  }
 }

@@ -39,4 +39,4 @@ const updateEntity = (tableName, id, entity) => {
     return getEntity(tableName, id);
 }
 
-export default { addEntity, deleteEntity, getAllEntities, getEntity, updateEntity }
+export { addEntity, deleteEntity, getAllEntities, getEntity, updateEntity }
