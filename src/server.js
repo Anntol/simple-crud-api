@@ -1,8 +1,9 @@
 import http from 'http';
+import config from './config.js';
 import route from './persons/person.router.js';
 
-const HOST = process.env.HOST || 'localhost';
-const PORT = process.env.PORT || 5500;
+const HOST = config.HOST || 'localhost';
+const PORT = config.PORT || 5500;
 
 const server = http.createServer((req, res) => {
     route(req, res);
