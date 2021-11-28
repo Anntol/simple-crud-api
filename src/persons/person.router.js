@@ -1,6 +1,7 @@
-import personService from './person.service.js';
-import { getBody } from '../getBody.js';
 import { validate } from 'uuid';
+import personService from './person.service.js';
+import checkPersonValidation from './person.validation.js';
+import { getBody } from '../getBody.js';
 
 const StatusCodes = {
     "Ok": 200,
@@ -39,7 +40,12 @@ export default function route(req, res) {
 
 async function addPerson(req, res) {
     try {
-        getBody(req, res, function () {        
+        getBody(req, res, function () {  
+            if (!checkPersonValidation(req.body)) {
+                res.writeHead(StatusCodes.BadRequest, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ message: 'Person properties are invalid!' }));
+            }
+
             personService.add(req.body).then((newPerson) => {
                 res.writeHead(StatusCodes.Created, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify(newPerson));
@@ -93,7 +99,12 @@ async function updatePerson(req, res, id) {
             res.writeHead(StatusCodes.NotFound, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'Person Not Found' }));
         } else {
-            getBody(req, res, function () { 
+            getBody(req, res, function () {
+                if (!checkPersonValidation(req.body)) {
+                    res.writeHead(StatusCodes.BadRequest, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ message: 'Person properties are invalid!' }));
+                }
+                
                 personService.update(id, req.body).then((updPerson) => {
                     res.writeHead(StatusCodes.Ok, { 'Content-Type': 'application/json' });
                     return res.end(JSON.stringify(updPerson));    
