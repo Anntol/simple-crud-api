@@ -7,26 +7,33 @@ const StatusCodes = {
     "Created": 201,
     "NoContent": 204,
     "BadRequest": 400,
-    "NotFound": 404
+    "NotFound": 404,
+    "InternalError": 500
 }
 
 export default function route(req, res) {
-    if(req.url === '/person' && req.method === 'GET') {
-        getPersons(req, res);
-    } else if(req.url.match(/\/person\/\w+/) && req.method === 'GET') {
-        const id = req.url.split('/')[2]
-        getPerson(req, res, id);
-    } else if(req.url === '/person' && req.method === 'POST') {
-        addPerson(req, res);
-    } else if(req.url.match(/\/person\/\w+/) && req.method === 'PUT') {
-        const id = req.url.split('/')[2]
-        updatePerson(req, res, id);
-    } else if(req.url.match(/\/person\/\w+/) && req.method === 'DELETE') {
-        const id = req.url.split('/')[2]
-        deletePerson(req, res, id);
-    } else {
-        res.writeHead(StatusCodes.NotFound, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ message: 'Route Not Found' }));
+    try {
+        if(req.url === '/person' && req.method === 'GET') {
+            getPersons(req, res);
+        } else if(req.url === '/person/serverError') {
+            throw new Error('Test Server Error!');
+        } else if(req.url.match(/\/person\/\w+/) && req.method === 'GET') {
+            const id = req.url.split('/')[2]
+            getPerson(req, res, id);
+        } else if(req.url === '/person' && req.method === 'POST') {
+            addPerson(req, res);
+        } else if(req.url.match(/\/person\/\w+/) && req.method === 'PUT') {
+            const id = req.url.split('/')[2]
+            updatePerson(req, res, id);
+        } else if(req.url.match(/\/person\/\w+/) && req.method === 'DELETE') {
+            const id = req.url.split('/')[2]
+            deletePerson(req, res, id);
+        } else {
+            res.writeHead(StatusCodes.NotFound, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Route Not Found' }));
+        }
+    } catch (error) {
+        SetServerError(error, res);
     }
 }
 
@@ -39,7 +46,7 @@ async function addPerson(req, res) {
             });
         });
     } catch (error) {
-        console.error(error);
+        SetServerError(error, res);
     }
 }
 
@@ -50,7 +57,7 @@ async function getPersons(req, res) {
         res.writeHead(StatusCodes.Ok, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(persons));
     } catch (error) {
-        console.error(error);
+        SetServerError(error, res);
     }
 }
 
@@ -70,7 +77,7 @@ async function getPerson(req, res, id) {
             res.end(JSON.stringify(person));
         }
     } catch (error) {
-        console.error(error);
+        SetServerError(error, res);
     }
 }
 
@@ -94,7 +101,7 @@ async function updatePerson(req, res, id) {
             });
         }
     } catch (error) {
-        console.error(error);
+        SetServerError(error, res);
     }
 }
 
@@ -115,6 +122,13 @@ async function deletePerson(req, res, id) {
             res.end();
         }
     } catch (error) {
-        console.error(error);
+        SetServerError(error, res);
     }
+}
+
+function SetServerError(error, res) {
+    console.error(error.message);
+
+    res.writeHead(StatusCodes.InternalError, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ message: 'Internal Server Error!' }));
 }

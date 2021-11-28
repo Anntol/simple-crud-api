@@ -8,6 +8,13 @@ const PORT = config.PORT || 5500;
 const server = http.createServer((req, res) => {
     route(req, res);
 });
+
+process.on('unhandledRejection', (err) => {
+    const { message, stack } = err;
+    console.error(`Unhandled rejection occured! ${message}. Stack: ${stack}`);
+    process.exit(1);
+});
+
 server.listen(PORT, HOST,
     () => console.log(`Server running on ${HOST}:${PORT}`)
 );
