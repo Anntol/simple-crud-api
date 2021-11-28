@@ -1,5 +1,14 @@
 import personService from './person.service.js';
 import { getBody } from '../getBody.js';
+import { validate } from 'uuid';
+
+const StatusCodes = {
+    "Ok": 200,
+    "Created": 201,
+    "NoContent": 204,
+    "BadRequest": 400,
+    "NotFound": 404
+}
 
 export default function route(req, res) {
     if(req.url === '/person' && req.method === 'GET') {
@@ -16,7 +25,7 @@ export default function route(req, res) {
         const id = req.url.split('/')[2]
         deletePerson(req, res, id);
     } else {
-        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.writeHead(StatusCodes.NotFound, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ message: 'Route Not Found' }));
     }
 }
@@ -25,7 +34,7 @@ async function addPerson(req, res) {
     try {
         getBody(req, res, function () {        
             personService.add(req.body).then((newPerson) => {
-                res.writeHead(201, { 'Content-Type': 'application/json' });
+                res.writeHead(StatusCodes.Created, { 'Content-Type': 'application/json' });
                 return res.end(JSON.stringify(newPerson));
             });
         });
@@ -38,7 +47,7 @@ async function getPersons(req, res) {
     try {
         const persons = await personService.getAll();
 
-        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.writeHead(StatusCodes.Ok, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(persons));
     } catch (error) {
         console.error(error);
@@ -47,13 +56,17 @@ async function getPersons(req, res) {
 
 async function getPerson(req, res, id) {
     try {
-        const person = await personService.getById(id);
+        if (!validate(id)) {
+            res.writeHead(StatusCodes.BadRequest, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Person Id is invalid!' }));
+        }
 
+        const person = await personService.getById(id);
         if(!person) {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.writeHead(StatusCodes.NotFound, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'Person Not Found' }));
         } else {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.writeHead(StatusCodes.Ok, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(person));
         }
     } catch (error) {
@@ -63,18 +76,23 @@ async function getPerson(req, res, id) {
 
 async function updatePerson(req, res, id) {
     try {
-        const person = await personService.getById(id);
-
-        if(!person) {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: 'Person Not Found' }));
-        } else {
-            const updPerson = await personService.update(id, req.body);
-
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            return res.end(JSON.stringify(updPerson));
+        if (!validate(id)) {
+            res.writeHead(StatusCodes.BadRequest, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Person Id is invalid!' }));
         }
 
+        const person = await personService.getById(id);
+        if(!person) {
+            res.writeHead(StatusCodes.NotFound, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Person Not Found' }));
+        } else {
+            getBody(req, res, function () { 
+                personService.update(id, req.body).then((updPerson) => {
+                    res.writeHead(StatusCodes.Ok, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify(updPerson));    
+                });                
+            });
+        }
     } catch (error) {
         console.error(error);
     }
@@ -82,15 +100,19 @@ async function updatePerson(req, res, id) {
 
 async function deletePerson(req, res, id) {
     try {
-        const person = await personService.getById(id);
+        if (!validate(id)) {
+            res.writeHead(StatusCodes.BadRequest, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Person Id is invalid!' }));
+        }
 
+        const person = await personService.getById(id);
         if(!person) {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.writeHead(StatusCodes.NotFound, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ message: 'Person Not Found' }));
         } else {
-            await person.remove(id);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ message: `Person ${id} removed` }));
+            await personService.remove(id);
+            res.writeHead(StatusCodes.NoContent);
+            res.end();
         }
     } catch (error) {
         console.error(error);
